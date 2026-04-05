@@ -1,17 +1,33 @@
 import streamlit as st
 import requests
 
-st.set_page_config(page_title="KUY JURNAL", page_icon="💛", layout="wide")
+# GABUNGKAN KONFIGURASI JADI SATU (Harus paling atas!)
+st.set_page_config(
+    page_title="KUY JURNAL", 
+    page_icon="💛", 
+    layout="wide"
+)
 
-# --- LOGIKA CEK LOGIN (VERSI TERBARU & FIX) ---
+# KODE UNTUK HILANGIN TOOLBAR & HEADER
+st.markdown("""
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    [data-testid="stToolbar"] {display: none !important;}
+    </style>
+    """, unsafe_allow_html=True)
 
+# --- LOGIKA CEK LOGIN ---
 auth_key = st.query_params.get("auth")
 
 if auth_key != "bestie_nugas_oke":
     st.warning("⚠️ Eits! Kamu harus login dulu di Bestie Nugas buat akses fitur ini.")
     st.info("Silakan balik ke: https://bestienugas.vercel.app")
     st.link_button("Ke Halaman Login", "https://bestienugas.vercel.app")
-    st.stop() # Matiin semua kode di bawah kalau kunci salah
+    st.stop() 
+
+# --- LANJUT KE KODE CSS DAN ISI HALAMAN ---# Matiin semua kode di bawah kalau kunci salah
 
 # --- KODE SISANYA (CSS, HEADER, DLL) LANJUT DI SINI ---
 
