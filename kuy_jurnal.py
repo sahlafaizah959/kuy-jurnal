@@ -267,7 +267,8 @@ if search_clicked:
                 params = {
                     "search": query,
                     "filter": filter_str,
-                    "per_page": 18
+                    "per_page": 18,
+                    "mailto": "sahlafaizah959@gmail.com"
                 }
 
                 response = requests.get(base_url, params=params, timeout=10)
