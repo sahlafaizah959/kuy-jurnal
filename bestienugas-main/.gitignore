@@ -45,3 +45,5 @@ vercel.json
 *.sln
 *.sw?
 Thumbs.db
+.vercel
+.env*.local

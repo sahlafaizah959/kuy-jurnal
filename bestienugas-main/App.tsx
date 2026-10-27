@@ -745,6 +745,16 @@ const App: React.FC = () => {
   <span>💛 Kuy Jurnal</span>
 </button>
 
+<button
+  onClick={() => {
+    // Membuka web editor yang baru saja kita kerjakan tadi
+    window.open('https://bestienugaseditor.vercel.app', '_blank');
+  }}
+  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200 shadow-sm transition-all duration-200 hover:-translate-y-0.5"
+>
+  <span>💚 Kuy Nulis</span>
+</button>
+
         </div>
       </header>
 
