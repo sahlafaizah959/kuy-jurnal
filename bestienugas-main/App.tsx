@@ -643,6 +643,8 @@ const App: React.FC = () => {
     }
   };
 
+// update layout mobilegit add .
+
   // ── Active Tab for Mobile View ('chat' | 'pdf') ──
 const [mobileTab, setMobileTab] = useState<'chat' | 'pdf'>('chat');
   // Get Active File Object
