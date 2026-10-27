@@ -643,6 +643,8 @@ const App: React.FC = () => {
     }
   };
 
+  // ── Active Tab for Mobile View ('chat' | 'pdf') ──
+const [mobileTab, setMobileTab] = useState<'chat' | 'pdf'>('chat');
   // Get Active File Object
   const activeFile = state.files.find((f) => f.id === activeFileId);
 
@@ -728,38 +730,57 @@ const App: React.FC = () => {
             Reset
           </Button>
 
-<button
-  onClick={() => {
-    if (!currentUser) {
-      alert("Login dulu di Bestie Nugas ya, biar bisa akses Kuy Jurnal! 💛");
-      return;
-    }
+          <button
+            onClick={() => {
+              if (!currentUser) {
+                alert("Login dulu di Bestie Nugas ya, biar bisa akses Kuy Jurnal! 💛");
+                return;
+              }
+              const streamlitUrl = `https://kuy-jurnal-bestie-nugas.streamlit.app?auth=bestie_nugas_oke&user=${encodeURIComponent(currentUser.email || '')}&t=${Date.now()}`;
+              window.open(streamlitUrl, '_blank');
+            }}
+            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold border border-amber-200 shadow-sm transition-all duration-200 hover:-translate-y-0.5"
+          >
+            <span>💛 Kuy Jurnal</span>
+          </button>
 
-    // Kita tambahkan &t=${Date.now()} supaya link-nya unik terus tiap diklik
-    const streamlitUrl = `https://kuy-jurnal-bestie-nugas.streamlit.app?auth=bestie_nugas_oke&user=${encodeURIComponent(currentUser.email || '')}&t=${Date.now()}`;
-    
-    window.open(streamlitUrl, '_blank');
-  }}
-  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold border border-amber-200 shadow-sm transition-all duration-200 hover:-translate-y-0.5"
->
-  <span>💛 Kuy Jurnal</span>
-</button>
-
-<button
-  onClick={() => {
-    // Membuka web editor yang baru saja kita kerjakan tadi
-    window.open('https://bestienugaseditor.vercel.app', '_blank');
-  }}
-  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200 shadow-sm transition-all duration-200 hover:-translate-y-0.5"
->
-  <span>💚 Kuy Nulis</span>
-</button>
-
+          <button
+            onClick={() => {
+              window.open('https://bestienugaseditor.vercel.app', '_blank');
+            }}
+            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200 shadow-sm transition-all duration-200 hover:-translate-y-0.5"
+          >
+            <span>💚 Kuy Nulis</span>
+          </button>
         </div>
       </header>
 
+      {/* ── MOBILE TAB SWITCHER (Hanya tampil di HP) ── */}
+      <div className="flex md:hidden bg-white border-b border-slate-200 px-4 py-2 gap-2 shrink-0 z-10">
+        <button
+          onClick={() => setMobileTab('chat')}
+          className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
+            mobileTab === 'chat'
+              ? 'bg-brand-600 text-white shadow-sm'
+              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+          }`}
+        >
+          💬 Chat & Diskusi
+        </button>
+        <button
+          onClick={() => setMobileTab('pdf')}
+          className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
+            mobileTab === 'pdf'
+              ? 'bg-brand-600 text-white shadow-sm'
+              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+          }`}
+        >
+          📄 Preview Jurnal ({state.files.length})
+        </button>
+      </div>
+
       {/* Main layout: Sidebar + Chat + PDF Viewer */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
 
         {/* ── Sidebar ── */}
         <Sidebar
@@ -776,7 +797,10 @@ const App: React.FC = () => {
         />
 
         {/* ── LEFT: Chat Area ── */}
-        <div className="flex-1 md:flex-[0.4] flex flex-col border-r border-slate-200 bg-white min-w-[280px]">
+        {/* Di HP hanya tampil jika mobileTab === 'chat', di laptop (md) selalu tampil */}
+        <div className={`flex-1 md:flex-[0.4] flex flex-col border-r border-slate-200 bg-white min-w-[280px] ${
+          mobileTab === 'chat' ? 'flex' : 'hidden md:flex'
+        }`}>
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
@@ -795,7 +819,11 @@ const App: React.FC = () => {
               </div>
             ) : (
               state.messages.map((msg) => (
-                <ChatMessage key={msg.id} message={msg} onCitationClick={handleCitationClick} />
+                <ChatMessage key={msg.id} message={msg} onCitationClick={(filename, page, text) => {
+                  handleCitationClick(filename, page, text);
+                  // Otomatis pindah ke tab PDF di HP jika user klik sitasi
+                  setMobileTab('pdf');
+                }} />
               ))
             )}
             <div ref={messagesEndRef} />
@@ -854,6 +882,7 @@ const App: React.FC = () => {
                     onClick={() => {
                       setActiveFileId(f.id);
                       setActivePage(1);
+                      setMobileTab('pdf'); // Pindah ke preview PDF di HP saat file diklik
                     }}
                     className={`shrink-0 text-xs px-2 py-1 rounded border cursor-pointer flex items-center gap-1 ${
                       activeFileId === f.id
@@ -919,7 +948,10 @@ const App: React.FC = () => {
         </div>
 
         {/* ── RIGHT: PDF Evidence Viewer ── */}
-        <div className="hidden md:flex md:flex-[0.6] bg-slate-100 p-4 flex-col">
+        {/* Di HP hanya tampil jika mobileTab === 'pdf', di laptop (md) selalu tampil */}
+        <div className={`flex-1 md:flex-[0.6] bg-slate-100 p-4 flex-col ${
+          mobileTab === 'pdf' ? 'flex' : 'hidden md:flex'
+        }`}>
           {activeFile ? (
             <PdfViewer
               key={`${activeFile.id}-${activePage}-${activeHighlight}`}
@@ -947,4 +979,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
